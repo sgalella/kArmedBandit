@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 def get_optimal_action(bandit):
-    max_R = [sum(x) if isinstance(x, tuple) else x for x in list(bandit.values())]
+    max_R = [sum(x) if isinstance(x, tuple) else x for x in bandit]
     return max_R.index(max(max_R))
 
 
