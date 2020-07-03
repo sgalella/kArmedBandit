@@ -7,6 +7,36 @@ def get_optimal_action(bandit):
     return max_R.index(max(max_R))
 
 
+def argmax(Q):
+    return np.random.choice(np.flatnonzero(Q == Q.max()))
+
+
+def run_bandit_ucb(bandit, num_steps, alpha=None, initial_values=None, c=1):
+    k = len(bandit)
+    if initial_values is None:
+        Q = np.zeros((k, ))
+    else:
+        assert initial_values.shape == (k, )
+        Q = initial_values.copy()
+    N = np.zeros((k, ))
+    R = np.zeros((num_steps, ))
+    A = np.zeros((num_steps, ))
+    best_action = get_optimal_action(bandit)
+    for iteration in range(num_steps):
+        action_upb = Q + c * np.sqrt(np.log(iteration) / N)
+        action_upb[np.where(np.isnan(action_upb))] = np.inf
+        idx = argmax(action_upb)
+        mean, std = bandit[idx]
+        R[iteration] = np.random.normal(mean, std)
+        A[iteration] = 1 if idx == best_action else 0
+        if alpha is None:
+            N[idx] += 1
+            Q[idx] += (1 / (N[idx])) * (R[iteration] - Q[idx])
+        else:
+            Q[idx] += alpha * (R[iteration] - Q[idx])
+    return Q, R, A
+
+
 def run_bandit_stat(bandit, num_steps, epsilon, alpha=None, initial_values=None):
     k = len(bandit)
     if initial_values is None:
@@ -20,7 +50,7 @@ def run_bandit_stat(bandit, num_steps, epsilon, alpha=None, initial_values=None)
     best_action = get_optimal_action(bandit)
     for iteration in range(num_steps):
         if np.random.random() > epsilon:
-            idx = np.random.choice(np.flatnonzero(Q == Q.max()))
+            idx = argmax(Q == Q.max())
         else:
             idx = np.random.choice(k)
         mean, std = bandit[idx]
@@ -43,7 +73,7 @@ def run_bandit_nonstat(k, num_steps, epsilon, alpha):
     history_R = [[0] for idx in range(k)]
     for iteration in range(num_steps):
         if np.random.random() > epsilon:
-            idx = np.random.choice(np.flatnonzero(Q == Q.max()))
+            idx = argmax(Q == Q.max())
         else:
             idx = np.random.choice(k)
         R[iteration] = bandit[idx]
