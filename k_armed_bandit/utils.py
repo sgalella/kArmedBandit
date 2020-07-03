@@ -7,9 +7,13 @@ def get_optimal_action(bandit):
     return max_R.index(max(max_R))
 
 
-def run_bandit_stat(bandit, num_steps, epsilon):
+def run_bandit_stat(bandit, num_steps, epsilon, alpha=None, initial_values=None):
     k = len(bandit)
-    Q = np.zeros((k, ))
+    if initial_values is None:
+        Q = np.zeros((k, ))
+    else:
+        assert initial_values.shape == (k, )
+        Q = initial_values.copy()
     N = np.zeros((k, ))
     R = np.zeros((num_steps, ))
     A = np.zeros((num_steps, ))
@@ -22,8 +26,11 @@ def run_bandit_stat(bandit, num_steps, epsilon):
         mean, std = bandit[idx]
         R[iteration] = np.random.normal(mean, std)
         A[iteration] = 1 if idx == best_action else 0
-        N[idx] += 1
-        Q[idx] += (1 / (N[idx])) * (R[iteration] - Q[idx])
+        if alpha is None:
+            N[idx] += 1
+            Q[idx] += (1 / (N[idx])) * (R[iteration] - Q[idx])
+        else:
+            Q[idx] += alpha * (R[iteration] - Q[idx])
     return Q, R, A
 
 
