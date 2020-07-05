@@ -11,6 +11,36 @@ def argmax(Q):
     return np.random.choice(np.flatnonzero(Q == Q.max()))
 
 
+def get_probabilities_action(H):
+    return np.exp(H) / np.sum(np.exp(H))
+
+
+def run_bandit_gradient(bandit, num_steps, alpha, baseline=True):
+    k = len(bandit)
+    actions = range(k)
+    H = np.zeros((k, ))
+    R = np.zeros((num_steps, ))
+    R_mean = 0
+    A = np.zeros((num_steps, ))
+    best_action = get_optimal_action(bandit)
+    for iteration in range(num_steps):
+        prob = get_probabilities_action(H)
+        idx = np.random.choice(actions, p=prob)
+        mean, std = bandit[idx]
+        R[iteration] = np.random.normal(mean, std)
+        A[iteration] = 1 if idx == best_action else 0
+        if baseline:
+            R_mean += 1 / (iteration + 1) * (R[iteration] - R_mean)
+        for action in actions:
+            if action == idx:
+                update = alpha * (R[iteration] - R_mean) * (1 - prob[action])
+                H[action] += update if not np.isnan(update) else 0
+            else:
+                update = alpha * (R[iteration] - R_mean) * prob[action]
+                H[action] -= update if not np.isnan(update) else 0
+    return H, R, A
+
+
 def run_bandit_ucb(bandit, num_steps, alpha=None, initial_values=None, c=1):
     k = len(bandit)
     if initial_values is None:
