@@ -94,13 +94,15 @@ def run_bandit_stat(bandit, num_steps, epsilon, alpha=None, initial_values=None)
     return Q, R, A
 
 
-def run_bandit_nonstat(k, num_steps, epsilon, alpha):
-    Q = np.zeros((k, ))
-    N = np.zeros((k, ))
+def run_bandit_nonstat(k, num_steps, epsilon, alpha, initial_values=None):
+    if initial_values is None:
+        Q = np.zeros((k, ))
+    else:
+        assert initial_values.shape == (k, )
+        Q = initial_values.copy()
     R = np.zeros((num_steps, ))
     A = np.zeros((num_steps, ))
-    bandit = {idx:0 for idx in range(k)}
-    history_R = [[0] for idx in range(k)]
+    bandit = [0 for idx in range(k)]
     for iteration in range(num_steps):
         if np.random.random() > epsilon:
             idx = argmax(Q == Q.max())
@@ -109,10 +111,7 @@ def run_bandit_nonstat(k, num_steps, epsilon, alpha):
         R[iteration] = bandit[idx]
         best_action = get_optimal_action(bandit)
         A[iteration] = 1 if idx == best_action else 0
-        N[idx] += 1
-        n = len(history_R[idx])
-        Q[idx] += history_R[idx][0] * (1 - alpha) ** n + sum([alpha * (1 - alpha) ** (n - i) * history_R[idx][i] for i in range(1, n)])
-        history_R[idx].append(R[iteration])
+        Q[idx] += alpha * (R[iteration] - Q[idx])
         for idx in range(k):
             bandit[idx] += np.random.normal(0, 0.01)
     return Q, R, A
