@@ -3,19 +3,60 @@ import matplotlib.pyplot as plt
 
 
 def get_optimal_action(bandit):
+    """
+    Returns the best action of a bandit.
+
+    Args:
+        bandit (list): Contains mean and std / reward for each k.
+
+    Returns:
+        int: Index of best action
+    """
     max_R = [sum(x) if isinstance(x, tuple) else x for x in bandit]
     return max_R.index(max(max_R))
 
 
 def argmax(Q):
+    """
+    Returns index of maximum Q. Breaks ties randomly.
+
+    Args:
+        Q (np.array): Q values for the different k.
+
+    Returns:
+        int: Index of maximum Q.
+    """
     return np.random.choice(np.flatnonzero(Q == Q.max()))
 
 
 def get_probabilities_action(H):
+    """
+    Computes the probabilities of selection given H.
+
+    Args:
+        H (np.array): Preference for each action.
+
+    Returns:
+        np.array: Probability vector.
+    """
     return np.exp(H) / np.sum(np.exp(H))
 
 
 def run_bandit_gradient(bandit, num_steps, alpha, baseline=True):
+    """
+    Computes the gradient bandit algorithm.
+
+    Args:
+        bandit (list): Contains mean and std / reward for each k. 
+        num_steps (int): Total number of steps of the simulation.  
+        alpha (int): Weight of recent rewards.
+        baseline (bool, optional): Use baseline rewards. Defaults to True.
+
+    Returns:
+        H (np.array): Preference for each action.
+        R (np.array): Reward obtained at each time step.
+        A (np.array): Action at each time step.
+    """
     k = len(bandit)
     actions = range(k)
     H = np.zeros((k, ))
@@ -42,6 +83,21 @@ def run_bandit_gradient(bandit, num_steps, alpha, baseline=True):
 
 
 def run_bandit_ucb(bandit, num_steps, alpha=None, initial_values=None, c=1):
+    """
+    Computes the Upper-Confidence-Bound action selection algorithm.
+
+    Args:
+        bandit (list): Contains mean and std / reward for each k. 
+        num_steps (int): Total number of steps of the simulation.  
+        alpha (int, optional): Weight of recent rewards. Defaults to None.
+        initial_values (np.array, optional): Initial Q values. Defaults to None.
+        c (int, optional): Confidence bound parameter. Defaults to 1.
+
+    Returns:
+        H (np.array): Preference for each action.
+        R (np.array): Reward obtained at each time step.
+        A (np.array): Action at each time step.
+    """
     k = len(bandit)
     if initial_values is None:
         Q = np.zeros((k, ))
@@ -68,6 +124,21 @@ def run_bandit_ucb(bandit, num_steps, alpha=None, initial_values=None, c=1):
 
 
 def run_bandit_stat(bandit, num_steps, epsilon, alpha=None, initial_values=None):
+    """
+    Runs the epsilon-greedy stationary problem.
+
+    Args:
+        bandit (list): Contains mean and std / reward for each k.  
+        num_steps (int): Total number of steps of the simulation.  
+        epsilon (int): Probability of not selecting optimal action.
+        alpha (int, optional): Weight of recent rewards. Defaults to None.
+        initial_values (np.array, optional): Initial Q values. Defaults to None.
+
+    Returns:
+        H (np.array): Preference for each action.
+        R (np.array): Reward obtained at each time step.
+        A (np.array): Action at each time step.
+    """
     k = len(bandit)
     if initial_values is None:
         Q = np.zeros((k, ))
@@ -95,6 +166,22 @@ def run_bandit_stat(bandit, num_steps, epsilon, alpha=None, initial_values=None)
 
 
 def run_bandit_nonstat(k, num_steps, epsilon, alpha, initial_values=None):
+    """
+    Runs the epislon-greedy nonstationary problem. Bandits are initialized at 0
+    and are updated at each step.
+
+    Args:
+        k (int): Number of different actions in bandit.
+        num_steps (int): Total number of steps of the simulation.  
+        epsilon (int): Probability of not selecting optimal action.
+        alpha (int, optional): Weight of recent rewards. Defaults to None.
+        initial_values (np.array, optional): Initial Q values. Defaults to None.
+
+    Returns:
+        H (np.array): Preference for each action.
+        R (np.array): Reward obtained at each time step.
+        A (np.array): Action at each time step.
+    """
     if initial_values is None:
         Q = np.zeros((k, ))
     else:
@@ -118,6 +205,12 @@ def run_bandit_nonstat(k, num_steps, epsilon, alpha, initial_values=None):
 
 
 def plot_bandit_dist(bandit):
+    """
+    Plots distribution of rewards for each k in bandit.
+
+    Args:
+        bandit (list): Contains mean and std / reward for each k.
+    """
     k = len(bandit)
     num_points = 10000
     data = np.zeros((num_points, k))
