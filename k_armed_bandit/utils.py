@@ -225,3 +225,4 @@ def plot_bandit_dist(bandit):
     plt.xticks(actions)
     plt.legend([r"$q_*$"], fontsize=12)
     plt.ylabel("Reward distribution", fontsize=12)
+    plt.show()
