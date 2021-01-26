@@ -1,0 +1,9 @@
+name: k-armed-bandit
+dependencies:
+  - python=3.6
+  - jupyterlab
+  - pip
+  - pip:
+    - matplotlib==3.1.3
+    - numpy==1.18.2
+    - tqdm==4.45.0
