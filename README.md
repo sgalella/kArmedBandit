@@ -1,5 +1,5 @@
 # k-Armed Bandit
-Code for the stationary and nonstationary [multi-armed bandits problem](https://en.wikipedia.org/wiki/Multi-armed_bandit).
+Code for solving the stationary and nonstationary [multi-armed bandits problem](https://en.wikipedia.org/wiki/Multi-armed_bandit) using the algorithms described in the second chapter of [Reinforcement Learning](http://incompleteideas.net/book/the-book.html).
 
 <p align="center">
   <img width="900" height="450" src="images/plots.png?">
